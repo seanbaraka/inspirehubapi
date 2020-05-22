@@ -13,6 +13,25 @@ export class ProductsController {
         res.status(OK).json(products) 
     }
 
+    async getOneProduct(req: Request, res: Response, next: NextFunction) {
+        let product = await getRepository(Product).findOne(req.params.productcode, { relations: ['category']})
+
+        if(product == null) res.status(NOT_FOUND).json({ error: NOT_FOUND})
+
+        res.status(OK).json(product)
+    }
+
+    async productsByCategory( req: Request, res: Response, next: NextFunction) {
+        let productCategory = req.params.categoryId
+
+        let products = await getRepository(Product).find({ where: { category: {id: productCategory }}})
+
+        if(products == null || products.length <= 0 ) res.status(NOT_FOUND).json({ error: "No product matching the category was found"})
+
+        res.status(OK).json(products)
+    }
+
+
     async categories (req: Request, res: Response, next: NextFunction) {
         let productCategories = await getRepository(ProductCategory).find()
 
@@ -21,7 +40,7 @@ export class ProductsController {
         res.status(OK).json(productCategories)
     }
 
-    async createcategory (req: Request, res: Response, next: NextFunction) {
+    async createcategory (req: Request, res: Response, next: NextFunction) {    
         let category = new ProductCategory()
         category = req.body
         if(category == null ) res.status(BAD_REQUEST).json({ error: BAD_REQUEST})

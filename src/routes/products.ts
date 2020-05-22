@@ -5,11 +5,15 @@ const router = Router()
 
 router.get('/', ProductsController.prototype.products)
 
-router.get('/categories', ProductsController.prototype.categories)
+router.get('/:productcode', ProductsController.prototype.getOneProduct);
 
-router.post('/createcategory', ProductsController.prototype.createcategory)
+router.get('/category/:categoryId', ProductsController.prototype.productsByCategory);
 
-router.post('/createproduct', ProductsController.prototype.createproduct)
+router.get('/categories', ProductsController.prototype.categories);
+
+router.post('/createcategory', ProductsController.prototype.createcategory);
+
+router.post('/createproduct', ProductsController.prototype.createproduct);
 
 
-module.exports = router
+module.exports = router;

@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -37,23 +38,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
 var User_1 = require("../entity/User");
+var http_status_codes_1 = require("http-status-codes");
+var dns_1 = require("dns");
 var UserController = /** @class */ (function () {
     function UserController() {
         this.userRepository = typeorm_1.getRepository(User_1.User);
     }
     UserController.prototype.all = function (request, response, next) {
         return __awaiter(this, void 0, void 0, function () {
+            var users;
             return __generator(this, function (_a) {
-                request.body = this.userRepository.find();
-                next();
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(User_1.User).find({ relations: ['role'] })];
+                    case 1:
+                        users = _a.sent();
+                        if (!users)
+                            response.status(http_status_codes_1.BAD_REQUEST).json("Errror Code: " + http_status_codes_1.BAD_REQUEST);
+                        response.status(http_status_codes_1.OK).json(users);
+                        return [2 /*return*/];
+                }
             });
         });
     };
     UserController.prototype.one = function (request, response, next) {
         return __awaiter(this, void 0, void 0, function () {
+            var user;
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.userRepository.findOne(request.params.id)];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(User_1.User).find({ where: { id: request.params.id }, relations: ['role'] })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user)
+                            response.status(http_status_codes_1.NOT_FOUND).json({ error_code: dns_1.NOTFOUND });
+                        response.status(http_status_codes_1.OK).json({ user: user });
+                        return [2 /*return*/];
+                }
             });
         });
     };
