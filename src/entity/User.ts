@@ -16,6 +16,9 @@ export class User {
     lastName: string;
 
     @Column()
+    salt: string;
+
+    @Column()
     password: string;
 
     @Column()

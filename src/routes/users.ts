@@ -11,16 +11,9 @@ router.get('/', UserController.prototype.all)
 
 router.get('/:id', UserController.prototype.one);
 
-router.post('/register', async (req, res, next ) => {
-    let user = new User()
-    user = req.body
-    let registerAttempt = await getRepository(User).save(user)
-    registerAttempt.role = await getRepository(Role).findOne({where: { name: 'customer'}})
-    
-    if(registerAttempt) {
-        res.status(CREATED).json(registerAttempt)
-    }
-})
+router.post('/customer/register', UserController.prototype.register);
+
+router.post('/login', UserController.prototype.login)
 
 router.post('/addusertorole', async (req, res, next ) => {
     let userid = req.body.userid

@@ -12,12 +12,14 @@ createConnection().then(async connection => {
     app.use(bodyParser.json());
 
     const userRouter = require('./routes/users')
+    const ordersRouter = require('./routes/orders')
     const productsRouter = require('./routes/products')
    
  
     // register express routes from defined application routes
     app.use('/api/users', userRouter)
     app.use('/api/products', productsRouter)
+    app.use('/api/orders', ordersRouter)
 
 
     // start express server

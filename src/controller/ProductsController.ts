@@ -3,6 +3,7 @@ import { getRepository } from "typeorm";
 import { Product } from "../entity/Product";
 import { NOT_FOUND, OK, BAD_REQUEST, NOT_MODIFIED, ACCEPTED } from "http-status-codes";
 import { ProductCategory } from "../entity/ProductCategory";
+import { OrderDetail } from "../entity/Order";
 
 export class ProductsController {
 
