@@ -1,16 +1,17 @@
 import { User } from "./User";
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, ManyToOne, OneToMany } from "typeorm";
-import { OrderDetail } from "./Order";
+import { OrderDetail } from "./OrderDetail";
 
 @Entity()
 export class Customer {
 
     @PrimaryGeneratedColumn()
-    id: number
+    cust_id: number
 
-    @ManyToOne(type => User, user => user.customers)
+    @ManyToOne(type => User, user => user.customers, {
+        cascade: true
+    })
     user: User
-
 
     @Column()
     address: string;
@@ -20,6 +21,5 @@ export class Customer {
 
     @OneToMany(type => OrderDetail, order => order.customer)
     orders: OrderDetail[]
-
 
 }

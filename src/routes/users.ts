@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { UserController } from '../controller/UserController'
-import { getConnection, getRepository } from "typeorm"
+import { getConnection, getRepository, useContainer } from "typeorm"
 import { User } from "../entity/User";
 import { Role } from "../entity/Role";
-import { BAD_REQUEST, CREATED, ACCEPTED, FORBIDDEN, UNAUTHORIZED, OK } from "http-status-codes"
+import { BAD_REQUEST, CREATED, ACCEPTED, FORBIDDEN, UNAUTHORIZED, OK } from "http-status-codes";
 
 const router = Router()
 
@@ -13,7 +13,13 @@ router.get('/:id', UserController.prototype.one);
 
 router.post('/customer/register', UserController.prototype.register);
 
+router.get('/customers', UserController.prototype.customers)
+
+router.get('/customer/:id', UserController.prototype.oneCustomer)
+
 router.post('/login', UserController.prototype.login)
+
+router.get('/userroles/', UserController.prototype.roles);
 
 router.post('/addusertorole', async (req, res, next ) => {
     let userid = req.body.userid
@@ -47,5 +53,6 @@ router.post('/adduserroles', async(req,res,next) => {
         res.status(400).json("error, the operaton could not be completed")
     }
 })
+
 
 module.exports = router;

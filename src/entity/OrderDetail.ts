@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, ManyToOne, ManyToMany, JoinTable, UpdateDateColumn } from "typeorm";
 import { Product } from "./Product";
 import { Customer } from "./Customer";
+import { Invoice } from "./Invoice";
 
 
 // enum OrderStatus {
@@ -18,6 +19,9 @@ export class OrderDetail {
     @PrimaryGeneratedColumn()
     id: number
 
+    @Column()
+    orderNumber: string
+    
     @CreateDateColumn()
     createdAt: Date
 
@@ -38,5 +42,8 @@ export class OrderDetail {
     @ManyToMany(type => Product)
     @JoinTable()
     products: Product[]
+
+    @OneToMany(type => Invoice, inv => inv.order)
+    invoices: Invoice[]
 
 }

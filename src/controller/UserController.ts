@@ -5,54 +5,71 @@ import { Role } from "../entity/Role";
 import { OK, BAD_REQUEST, NOT_FOUND, NOT_MODIFIED, CREATED, UNAUTHORIZED } from "http-status-codes"
 import { NOTFOUND } from "dns";
 import { Customer } from "../entity/Customer";
-import { OrderDetail } from "../entity/Order";
+import { OrderDetail } from "../entity/OrderDetail";
 
-import { randomBytes, pbkdf2Sync } from "crypto";
+import { randomBytes, pbkdf2Sync, createCipher, pbkdf2 } from "crypto";
+import * as io from "socket.io";
+import {Invoice} from "../entity/Invoice";
+import {error} from "util";
+
+
 
 export class UserController {
 
 
     private userRepository = getRepository(User);
-    salt = randomBytes(16).toString('hex')
 
-    async all(request: Request, response: Response, next: NextFunction) {
+    
+    async all(req: Request, response: Response, next: NextFunction) {
        let users = await getRepository(User).find({ relations: ['role'] })
        if(!users) response.status(BAD_REQUEST).json(`Errror Code: ${BAD_REQUEST}`)
 
        response.status(OK).json(users)
     }
 
-    async one(request: Request, response: Response, next: NextFunction) {
-        let user = await getRepository(User).find({ where: {id: request.params.id}, relations: ['role']})
+    async customers(req: any, response: Response, next: NextFunction) {
+        let customers = await getRepository(Customer).find({ relations: ['user']})
+        if(customers === null || customers.length  < 1) response.status(NOT_FOUND).end()
+
+
+        response.status(OK).json(customers);
+    }
+
+    async oneCustomer(req: Request, response: Response, next: NextFunction) {
+        let customer = await getRepository(Customer).findOne(req.params.id, { relations: ['user']})
+
+        if(!customer) response.status(NOT_FOUND).end()
+
+        response.status(OK).json(customer)
+    }
+
+    async one(request: Request, response: Response) {
+        let user = await getRepository(User).findOne(request.params.id,{ relations: ['role']})
 
         if(!user ) response.status(NOT_FOUND).json({ error_code: NOTFOUND})
         
         response.status(OK).json({ user: user })
     }
 
-    async save(request: Request, response: Response, next: NextFunction) {
-        return this.userRepository.save(request.body);
-    }
 
-    async remove(request: Request, response: Response, next: NextFunction) {
+    async remove(request: Request) {
         let userToRemove = await this.userRepository.findOne(request.params.id);
         await this.userRepository.remove(userToRemove);
     }
 
-    setPassword(password: string ,salt: string) {
-        return pbkdf2Sync(password,salt,1000,64, 'sha512').toString('hex')
-    }
+   
 
-
-    async login(req: Request, res: Response, next: NextFunction) {
+    async login(req: Request, res: Response) {
         
         let user = await getRepository(User).findOne({ where: { 
             emailAddress: req.body.email
         }})
 
+ 
         if(!user) res.status(NOT_FOUND).json({error: "user not found"})
 
         let passwordhash = pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex')      
+
 
         if(passwordhash === user.password) {
             res.status(OK).json({ success: {
@@ -63,11 +80,23 @@ export class UserController {
         }
     }
 
-    async register(req: Request, res: Response, next: NextFunction) {
+    async roles( req: Request, res: Response, next: NextFunction) {
+
+        let roles = await getRepository(Role).find()
+        // console.log(roles)
+        if(roles == null || roles.length < 1) res.status(NOT_FOUND).json({error: "User Roles not found"})
+
+        res.status(OK).json({success: roles})
+    }
+
+    async register(req: any, res: Response) {
+
         let user = new User()
         user.firstName = req.body.firstname
         user.lastName = req.body.lastname
-        user.salt = randomBytes(16).toString('hex')
+
+        
+        user.salt = randomBytes(16).toString('hex');
 
         user.password = pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex')
 
@@ -90,6 +119,12 @@ export class UserController {
             amount += element.price
         });
 
+        let month = new Date().getMonth()
+        let date = new Date().getDate()
+        let seconds = new Date().getSeconds()
+
+
+        order.orderNumber = `#ON${date}${month}${seconds}`
         order.amount = amount
 
         customer.user = user
@@ -107,6 +142,32 @@ export class UserController {
         let orderAdd = await getRepository(OrderDetail).save(order)
 
         if(!orderAdd) res.status(NOT_MODIFIED).json({error: "An error occured and the operation could not be completed"})
+
+        let inv = new Invoice()
+        inv.order = order
+
+        let invmonth = new Date().getMonth()
+        let invdate = new Date().getDate()
+        let invseconds = new Date().getSeconds()
+
+        inv.number = `INV${invdate}${invmonth}${invseconds}`
+
+        let now = new Date(Date.now())
+        let dueDate = now.setDate(now.getDate() + 30)
+
+        inv.duedate = new Date(dueDate)
+
+        let createInvoiceAttempt = await getRepository(Invoice).save(inv);
+
+        let io: io.Socket = req.io;
+        let invoices = await getRepository(Invoice).find({relations: ['order']})
+        let orders = await getRepository(OrderDetail).find({ relations: ['products','customer', 'customer.user']})
+        let allCustomers = await getRepository(Customer).find({ relations: ['user']})
+
+
+        io.emit("updateOrders", orders)
+        io.emit("updateCustomers", allCustomers)
+        io.emit("updateInvoices", invoices)
 
         res.status(CREATED).json({ customer: customerAdd.user})
 

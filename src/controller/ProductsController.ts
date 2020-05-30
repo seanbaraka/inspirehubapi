@@ -3,7 +3,7 @@ import { getRepository } from "typeorm";
 import { Product } from "../entity/Product";
 import { NOT_FOUND, OK, BAD_REQUEST, NOT_MODIFIED, ACCEPTED } from "http-status-codes";
 import { ProductCategory } from "../entity/ProductCategory";
-import { OrderDetail } from "../entity/Order";
+import { OrderDetail } from "../entity/OrderDetail";
 
 export class ProductsController {
 
@@ -37,7 +37,7 @@ export class ProductsController {
         let productCategories = await getRepository(ProductCategory).find()
 
         if(productCategories == null || productCategories.length <= 0 ) res.status(NOT_FOUND).json({ error: "Not found"})
-
+ 
         res.status(OK).json(productCategories)
     }
 
