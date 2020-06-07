@@ -13,7 +13,7 @@ router.get('/:id', UserController.prototype.one);
 
 router.post('/customer/register', UserController.prototype.register);
 
-router.get('/customers', UserController.prototype.customers)
+router.get('/customers/all', UserController.prototype.customers)
 
 router.get('/customer/:id', UserController.prototype.oneCustomer)
 

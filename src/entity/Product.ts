@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from "typeorm";
 import { ProductCategory } from "./ProductCategory";
 import { OrderDetail } from "./OrderDetail";
+import {type} from "os";
 
 @Entity()
 export class Product {
@@ -21,6 +22,9 @@ export class Product {
 
     @Column('float')
     price: number
+
+    @ManyToMany(type => OrderDetail, od=> od.products)
+    orders: OrderDetail[]
 
     @CreateDateColumn()
     createdAt: Date

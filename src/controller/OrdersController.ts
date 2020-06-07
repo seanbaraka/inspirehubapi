@@ -6,6 +6,8 @@ import { Customer } from "../entity/Customer";
 import { User } from "../entity/User";
 import * as io from "socket.io";
 import {Invoice} from "../entity/Invoice";
+import {Product} from "../entity/Product";
+import {CommandUtils} from "typeorm/commands/CommandUtils";
 
 export class OrdersController {
 
@@ -37,7 +39,7 @@ export class OrdersController {
     }
 
     async getInvoices(req, res: Response, next: NextFunction) {
-        let invoices = await getRepository(Invoice).find({relations: ['order']})
+        let invoices = await getRepository(Invoice).find({relations: ['order','order.products']})
         if(invoices === null || invoices.length <= 0) res.status(NOT_FOUND).json({error: 'There are no invoices at the moment'})
 
         let io: io.Socket = req.io
@@ -45,6 +47,43 @@ export class OrdersController {
         io.emit("updateInvoices", invoices);
 
         res.status(OK).json(invoices);
+    }
+
+    async getUnpaidInvoices(req, res:Response, next: NextFunction) {
+        let invoices = await getRepository(Invoice).find({ relations: ['order', 'order.products', 'order.customer', 'order.customer.user'], where: {
+            status: 0
+            }})
+        if(invoices.length <= 0 || invoices === null) res.status(NOT_FOUND).json({error: NOT_FOUND})
+
+        let io: io.Socket = req.io;
+        io.emit('updateUnpaidInvoices', invoices);
+
+        res.status(OK).json(invoices)
+
+    }
+
+    async mostOrderedProduct(req,res,next) {
+        let orders = await getRepository(OrderDetail).find(
+            { relations: ['products','products.category','products.orders',
+                    'products.orders.customer',"products.orders.customer.user"]})
+        let products: Product[];
+
+        function getProducts(orders: OrderDetail[]): Product[] {
+            let products = []
+            orders.forEach((item) => {
+               products.push(...item.products)
+            })
+            return products;
+        }
+
+        products = getProducts(orders)
+
+        let mostOrderedProduct = products.sort((a,b) =>
+            products.filter(item => item.id === a.id).length
+            - products.filter(item => item.id == b.id).length
+        ).pop()
+
+        res.status(OK).json(mostOrderedProduct)
     }
 
     async createInvoice(order: OrderDetail, dateDue: number): Promise<Boolean>{

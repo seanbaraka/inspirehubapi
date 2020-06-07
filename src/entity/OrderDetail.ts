@@ -4,14 +4,12 @@ import { Customer } from "./Customer";
 import { Invoice } from "./Invoice";
 
 
-// enum OrderStatus {
-//     processing, // payment has been received and customer is awaiting products
-//     pending_payment, // order is placed but payment has not been initiated
-//     completed, // order is fulfilled and complete
-//     on_hold, //delivered but awaiting payment
-//     cancelled, // order is cancelled either by the customer or admin
-//     refunded // order has been cancelled and refunded by the admin
-// }
+enum OrderStatus {
+    processing, // payment has been received and customer is awaiting products
+    pending, // order is placed but payment has not been initiated
+    completed, // order is fulfilled and complete
+    cancelled, // order is cancelled either by the customer or admin
+}
 
 @Entity()
 export class OrderDetail {
@@ -31,15 +29,15 @@ export class OrderDetail {
     @Column('float')
     amount: number
 
-    @Column({
-        default: 'pending'
+    @Column('int',{
+        default: OrderStatus.processing
     })
-    status: string
+    status: OrderStatus
 
     @ManyToOne(type => Customer, customer => customer.orders)
     customer: Customer
 
-    @ManyToMany(type => Product)
+    @ManyToMany(type => Product, p => p.orders)
     @JoinTable()
     products: Product[]
 

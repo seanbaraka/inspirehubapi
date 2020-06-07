@@ -8,4 +8,8 @@ router.get('/', OrdersController.prototype.getall)
 router.get('/customer/:id', OrdersController.prototype.getCustomerOrders)
 
 router.get('/invoices', OrdersController.prototype.getInvoices);
+
+router.get('/unpaid', OrdersController.prototype.getUnpaidInvoices)
+
+router.get('/products/top', OrdersController.prototype.mostOrderedProduct)
 module.exports = router;

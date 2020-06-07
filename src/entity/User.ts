@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn,  Column, ManyToOne, OneToMany } from "typeorm";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    OneToMany,
+    CreateDateColumn, UpdateDateColumn
+} from "typeorm";
 import { Role } from "./Role";
 import { Customer } from "./Customer";
 import { Admin } from "./Admin";
@@ -34,6 +41,12 @@ export class User {
 
     @OneToMany(type => Admin, admin => admin.user)
     admins: Admin[]
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
 
 
 }

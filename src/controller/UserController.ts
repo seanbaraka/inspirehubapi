@@ -27,9 +27,9 @@ export class UserController {
        response.status(OK).json(users)
     }
 
-    async customers(req: any, response: Response, next: NextFunction) {
+    async customers(req: Request, response: Response, next: NextFunction) {
         let customers = await getRepository(Customer).find({ relations: ['user']})
-        if(customers === null || customers.length  < 1) response.status(NOT_FOUND).end()
+        if(customers === null || customers.length  <=0 ) response.status(NOT_FOUND).end()
 
 
         response.status(OK).json(customers);
@@ -46,7 +46,7 @@ export class UserController {
     async one(request: Request, response: Response) {
         let user = await getRepository(User).findOne(request.params.id,{ relations: ['role']})
 
-        if(!user ) response.status(NOT_FOUND).json({ error_code: NOTFOUND})
+        if(user === null ) response.status(NOT_FOUND).end()
         
         response.status(OK).json({ user: user })
     }
