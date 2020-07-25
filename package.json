@@ -25,7 +25,7 @@
       "socket.io": "^2.3.0",
       "typeorm": "0.2.24"
    },
-   "scripts": {
+   "scripts": { 
       "start": "ts-node src/index.ts",
       "start:app": "node ./dist/index.js --env=production",
       "start:app-initial": "node -r module-alias/register ./dist",
