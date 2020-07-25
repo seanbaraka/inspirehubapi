@@ -20,14 +20,17 @@
       "http-status-codes": "^1.4.0",
       "morgan": "^1.10.0",
       "mysql": "^2.14.1",
+      "nodemon": "^2.0.4",
       "reflect-metadata": "^0.1.10",
       "socket.io": "^2.3.0",
       "typeorm": "0.2.24"
    },
    "scripts": {
       "start": "ts-node src/index.ts",
-      "start:app": "node ./dist",
-      "start:app-initial": "none -r module-alias/register ./dist",
-      "start:dev": "nodemon --config nodemon.json"
+      "start:app": "node ./dist/index.js --env=production",
+      "start:app-initial": "node -r module-alias/register ./dist",
+      "start:dev": "nodemon --config nodemon.json",
+      "start:prod": "ts-node ./src --env=production",
+      "start:fin": "cd dist && node index.js"
    }
 }

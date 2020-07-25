@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
 var ProductCategory_1 = require("./ProductCategory");
+var OrderDetail_1 = require("./OrderDetail");
+var Quotation_1 = require("./Quotation");
 var Product = /** @class */ (function () {
     function Product() {
     }
@@ -37,6 +39,10 @@ var Product = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Product.prototype, "price", void 0);
     __decorate([
+        typeorm_1.ManyToMany(function (type) { return OrderDetail_1.OrderDetail; }, function (od) { return od.products; }),
+        __metadata("design:type", Array)
+    ], Product.prototype, "orders", void 0);
+    __decorate([
         typeorm_1.CreateDateColumn(),
         __metadata("design:type", Date)
     ], Product.prototype, "createdAt", void 0);
@@ -44,10 +50,13 @@ var Product = /** @class */ (function () {
         typeorm_1.UpdateDateColumn(),
         __metadata("design:type", Date)
     ], Product.prototype, "updatedAt", void 0);
+    __decorate([
+        typeorm_1.ManyToMany(function (type) { return Quotation_1.Quotation; }, function (qt) { return qt.products; }),
+        __metadata("design:type", Array)
+    ], Product.prototype, "quotations", void 0);
     Product = __decorate([
         typeorm_1.Entity()
     ], Product);
     return Product;
 }());
 exports.Product = Product;
-//# sourceMappingURL=Product.js.map

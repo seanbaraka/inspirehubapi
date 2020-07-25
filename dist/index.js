@@ -40,20 +40,47 @@ require("reflect-metadata");
 var typeorm_1 = require("typeorm");
 var express = require("express");
 var bodyParser = require("body-parser");
-typeorm_1.createConnection().then(function (connection) { return __awaiter(void 0, void 0, void 0, function () {
-    var app, userRouter, productsRouter;
+typeorm_1.createConnection({
+    type: 'mysql',
+    host: 'localhost',
+    database: 'inspireh_inspirehubdb',
+    username: 'inspireh_root',
+    password: 'Developer@1425',
+    port: 3306,
+    entities: [__dirname + '/entity/*.js']
+}).then(function (connection) { return __awaiter(void 0, void 0, void 0, function () {
+    var app, userRouter, ordersRouter, productsRouter, quotesRouter, http, cors, corsOptions, server, io, port;
     return __generator(this, function (_a) {
         app = express();
         app.use(bodyParser.json());
         userRouter = require('./routes/users');
+        ordersRouter = require('./routes/orders');
         productsRouter = require('./routes/products');
+        quotesRouter = require('./routes/quotes');
+        http = require('http');
+        cors = require('cors');
+        corsOptions = {
+            origin: "http://localhost:4200",
+            optionsSuccessStatus: 200
+        };
+        app.use(cors(corsOptions));
+        server = http.createServer(app);
+        io = require('socket.io').listen(server);
+        io.on("connection", function (socket) {
+            console.log("a new user has joined the connection");
+        });
+        app.use(function (req, res, next) {
+            req.io = io;
+            next();
+        });
         // register express routes from defined application routes
         app.use('/api/users', userRouter);
         app.use('/api/products', productsRouter);
-        // start express server
-        app.listen(3000);
-        console.log("Express server has started on port 3000. Open http://localhost:3000 to see results");
+        app.use('/api/orders', ordersRouter);
+        app.use('/api/quotes', quotesRouter);
+        port = 3000;
+        server.listen(port);
+        console.log("Express server has started on port " + port);
         return [2 /*return*/];
     });
 }); }).catch(function (error) { return console.log(error); });
-//# sourceMappingURL=index.js.map

@@ -44,4 +44,3 @@ var ProductCategory = /** @class */ (function () {
     return ProductCategory;
 }());
 exports.ProductCategory = ProductCategory;
-//# sourceMappingURL=ProductCategory.js.map

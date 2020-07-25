@@ -8,7 +8,7 @@ import { OrderDetail } from "../entity/OrderDetail";
 export class ProductsController {
 
     async products(req: Request, res: Response, next: NextFunction) {
-        let products = await getRepository(Product).find({ relations: ['category']})
+        let products = await getRepository(Product).find({ relations: ['category','orders']})
         if(products == null || products.length <= 0 ) res.status(NOT_FOUND).json({ error: "Not found"})
 
         res.status(OK).json(products) 
@@ -25,7 +25,9 @@ export class ProductsController {
     async productsByCategory( req: Request, res: Response, next: NextFunction) {
         let productCategory = req.params.categoryId
 
-        let products = await getRepository(Product).find({ where: { category: {id: productCategory }}})
+        let products = await getRepository(Product).find({
+            where: { category: {id: productCategory }},
+            relations: ['orders']})
 
         if(products == null || products.length <= 0 ) res.status(NOT_FOUND).json({ error: "No product matching the category was found"})
 
@@ -36,8 +38,8 @@ export class ProductsController {
     async categories (req: Request, res: Response, next: NextFunction) {
         let productCategories = await getRepository(ProductCategory).find()
 
-        if(productCategories == null || productCategories.length <= 0 ) res.status(NOT_FOUND).json({ error: "Not found"})
- 
+        if(productCategories === null || productCategories.length <= 0 ) res.status(NOT_FOUND).json({ error: "Not found"})
+
         res.status(OK).json(productCategories)
     }
 
@@ -53,7 +55,7 @@ export class ProductsController {
     }
 
     async createproduct (req: Request, res: Response, next: NextFunction) {
-        let product = new Product()
+        let product: Product
         product = req.body
 
         if(product == null) res.status(BAD_REQUEST).json({ error: BAD_REQUEST})
@@ -66,6 +68,5 @@ export class ProductsController {
 
         res.status(ACCEPTED).json({ success: productInsertAttempt })
     }
-
-
+    
 }

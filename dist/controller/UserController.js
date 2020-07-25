@@ -38,13 +38,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
 var User_1 = require("../entity/User");
+var Role_1 = require("../entity/Role");
 var http_status_codes_1 = require("http-status-codes");
-var dns_1 = require("dns");
+var Customer_1 = require("../entity/Customer");
+var OrderDetail_1 = require("../entity/OrderDetail");
+var crypto_1 = require("crypto");
+var Invoice_1 = require("../entity/Invoice");
 var UserController = /** @class */ (function () {
     function UserController() {
         this.userRepository = typeorm_1.getRepository(User_1.User);
     }
-    UserController.prototype.all = function (request, response, next) {
+    UserController.prototype.all = function (req, response, next) {
         return __awaiter(this, void 0, void 0, function () {
             var users;
             return __generator(this, function (_a) {
@@ -60,30 +64,62 @@ var UserController = /** @class */ (function () {
             });
         });
     };
-    UserController.prototype.one = function (request, response, next) {
+    UserController.prototype.customers = function (req, response, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var customers;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).find({ relations: ['user', 'orders'] })];
+                    case 1:
+                        customers = _a.sent();
+                        if (customers === null || customers.length <= 0)
+                            response.status(http_status_codes_1.NOT_FOUND).end();
+                        response.status(http_status_codes_1.OK).json(customers);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserController.prototype.oneCustomer = function (req, response, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var customer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).findOne(req.params.id, { relations: ['user'] })];
+                    case 1:
+                        customer = _a.sent();
+                        if (!customer)
+                            response.status(http_status_codes_1.NOT_FOUND).end();
+                        response.status(http_status_codes_1.OK).json(customer);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // async getCustomerId(req: Request, res: Response) {
+    //     let customer = await getRepository(User).findOne({
+    //         where: {
+    //             emailAddress: req.params.
+    //         }
+    //     })
+    // }
+    UserController.prototype.one = function (request, response) {
         return __awaiter(this, void 0, void 0, function () {
             var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_1.getRepository(User_1.User).find({ where: { id: request.params.id }, relations: ['role'] })];
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(User_1.User).findOne(request.params.id, { relations: ['role'] })];
                     case 1:
                         user = _a.sent();
-                        if (!user)
-                            response.status(http_status_codes_1.NOT_FOUND).json({ error_code: dns_1.NOTFOUND });
+                        if (user === null)
+                            response.status(http_status_codes_1.NOT_FOUND).end();
                         response.status(http_status_codes_1.OK).json({ user: user });
                         return [2 /*return*/];
                 }
             });
         });
     };
-    UserController.prototype.save = function (request, response, next) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, this.userRepository.save(request.body)];
-            });
-        });
-    };
-    UserController.prototype.remove = function (request, response, next) {
+    UserController.prototype.remove = function (request) {
         return __awaiter(this, void 0, void 0, function () {
             var userToRemove;
             return __generator(this, function (_a) {
@@ -99,7 +135,175 @@ var UserController = /** @class */ (function () {
             });
         });
     };
+    UserController.prototype.login = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, passwordhash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(User_1.User).findOne({ where: {
+                                emailAddress: req.body.email
+                            } })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user)
+                            res.status(http_status_codes_1.NOT_FOUND).json({ error: "user not found" });
+                        passwordhash = crypto_1.pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex');
+                        if (passwordhash === user.password) {
+                            res.status(http_status_codes_1.OK).json({ success: {
+                                    id: user.id, email: user.emailAddress
+                                } });
+                        }
+                        else {
+                            res.status(http_status_codes_1.UNAUTHORIZED).json({ error: "Invalid login credentials" });
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserController.prototype.roles = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var roles;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Role_1.Role).find()
+                        // console.log(roles)
+                    ];
+                    case 1:
+                        roles = _a.sent();
+                        // console.log(roles)
+                        if (roles == null || roles.length < 1)
+                            res.status(http_status_codes_1.NOT_FOUND).json({ error: "User Roles not found" });
+                        res.status(http_status_codes_1.OK).json({ success: roles });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserController.prototype.registerCustomer = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, _a, customer, newCustomer, updatedCustomers, io;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        user = new User_1.User();
+                        user.firstName = req.body.firstname;
+                        user.lastName = req.body.lastname;
+                        user.salt = crypto_1.randomBytes(16).toString('hex');
+                        user.password = crypto_1.pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex');
+                        user.emailAddress = req.body.email;
+                        _a = user;
+                        return [4 /*yield*/, typeorm_1.getRepository(Role_1.Role).findOne({ where: {
+                                    name: 'customer'
+                                } })];
+                    case 1:
+                        _a.role = _b.sent();
+                        customer = new Customer_1.Customer();
+                        customer.address = req.body.address;
+                        customer.telephone = req.body.phone;
+                        customer.user = user;
+                        return [4 /*yield*/, typeorm_1.getRepository(User_1.User).save(user)];
+                    case 2:
+                        _b.sent();
+                        return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).save(customer)];
+                    case 3:
+                        newCustomer = _b.sent();
+                        return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).find({
+                                relations: ['user', 'orders']
+                            })];
+                    case 4:
+                        updatedCustomers = _b.sent();
+                        io = req.io;
+                        io.emit('updateCustomers', updatedCustomers);
+                        res.status(http_status_codes_1.OK).json(newCustomer);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserController.prototype.register = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, _a, customer, order, amount, month, date, seconds, registerAttempt, customerAdd, orderAdd, inv, invmonth, invdate, invseconds, now, dueDate, createInvoiceAttempt, io, invoices, orders, allCustomers;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        user = new User_1.User();
+                        user.firstName = req.body.firstname;
+                        user.lastName = req.body.lastname;
+                        user.salt = crypto_1.randomBytes(16).toString('hex');
+                        user.password = crypto_1.pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex');
+                        user.emailAddress = req.body.email;
+                        _a = user;
+                        return [4 /*yield*/, typeorm_1.getRepository(Role_1.Role).findOne({ where: {
+                                    name: 'customer'
+                                } })];
+                    case 1:
+                        _a.role = _b.sent();
+                        customer = new Customer_1.Customer();
+                        customer.address = req.body.address;
+                        customer.telephone = req.body.phone;
+                        order = new OrderDetail_1.OrderDetail();
+                        order.products = req.body.order;
+                        amount = 0 //initialize the order amount to 0
+                        ;
+                        // calculate the total order amount from the array of products selected
+                        order.products.forEach(function (element) {
+                            amount += element.price;
+                        });
+                        month = new Date().getMonth();
+                        date = new Date().getDate();
+                        seconds = new Date().getSeconds();
+                        order.orderNumber = "#ON" + date + month + seconds;
+                        order.amount = amount;
+                        customer.user = user;
+                        return [4 /*yield*/, typeorm_1.getRepository(User_1.User).save(user)];
+                    case 2:
+                        registerAttempt = _b.sent();
+                        if (!registerAttempt)
+                            res.status(http_status_codes_1.NOT_MODIFIED).json({ error: "An error occured and the operation could not be completed" });
+                        customer.user = registerAttempt;
+                        return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).save(customer)];
+                    case 3:
+                        customerAdd = _b.sent();
+                        if (!customerAdd)
+                            res.status(http_status_codes_1.NOT_MODIFIED).json({ error: "An error occured and the operation could not be completed" });
+                        order.customer = customerAdd;
+                        return [4 /*yield*/, typeorm_1.getRepository(OrderDetail_1.OrderDetail).save(order)];
+                    case 4:
+                        orderAdd = _b.sent();
+                        if (!orderAdd)
+                            res.status(http_status_codes_1.NOT_MODIFIED).json({ error: "An error occured and the operation could not be completed" });
+                        inv = new Invoice_1.Invoice();
+                        inv.order = order;
+                        invmonth = new Date().getMonth();
+                        invdate = new Date().getDate();
+                        invseconds = new Date().getSeconds();
+                        inv.number = "INV" + invdate + invmonth + invseconds;
+                        now = new Date(Date.now());
+                        dueDate = now.setDate(now.getDate() + 30);
+                        inv.duedate = new Date(dueDate);
+                        return [4 /*yield*/, typeorm_1.getRepository(Invoice_1.Invoice).save(inv)];
+                    case 5:
+                        createInvoiceAttempt = _b.sent();
+                        io = req.io;
+                        return [4 /*yield*/, typeorm_1.getRepository(Invoice_1.Invoice).find({ relations: ['order'] })];
+                    case 6:
+                        invoices = _b.sent();
+                        return [4 /*yield*/, typeorm_1.getRepository(OrderDetail_1.OrderDetail).find({ relations: ['products', 'customer', 'customer.user'] })];
+                    case 7:
+                        orders = _b.sent();
+                        return [4 /*yield*/, typeorm_1.getRepository(Customer_1.Customer).find({ relations: ['user'] })];
+                    case 8:
+                        allCustomers = _b.sent();
+                        io.emit("updateOrders", orders);
+                        io.emit("updateCustomers", allCustomers);
+                        io.emit("updateInvoices", invoices);
+                        res.status(http_status_codes_1.CREATED).json({ customer: customerAdd.user });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UserController;
 }());
 exports.UserController = UserController;
-//# sourceMappingURL=UserController.js.map

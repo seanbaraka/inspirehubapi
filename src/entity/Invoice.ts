@@ -1,9 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from 'typeorm';
 import { OrderDetail } from './OrderDetail';
+import { Transaction } from './Transaction';
 
 enum InvoiceStatus {
     notpaid,
-    paid
+    paid,
+    partiallypaid
 }
 
 @Entity()
@@ -28,4 +30,11 @@ export class Invoice {
         default: InvoiceStatus.notpaid
     })
     status: InvoiceStatus
+
+    @OneToMany(type=> Transaction, trct => trct.invoice)
+    payments: Transaction[]
+
+    @Column()
+    balance: number
+
 }

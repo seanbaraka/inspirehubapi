@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Up
 import { ProductCategory } from "./ProductCategory";
 import { OrderDetail } from "./OrderDetail";
 import {type} from "os";
+import {Quotation} from "./Quotation";
 
 @Entity()
 export class Product {
@@ -32,4 +33,6 @@ export class Product {
     @UpdateDateColumn()
     updatedAt: Date
 
+    @ManyToMany( type => Quotation, qt => qt.products)
+    quotations: Quotation[]
 }

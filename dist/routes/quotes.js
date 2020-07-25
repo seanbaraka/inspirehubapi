@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var QuotationsController_1 = require("../controller/QuotationsController");
+var express = require('express');
+var router = express.Router();
+router.get('/all', QuotationsController_1.QuotationsController.prototype.getAll);
+router.get('/:id', QuotationsController_1.QuotationsController.prototype.getOne);
+router.post('/addquote', QuotationsController_1.QuotationsController.prototype.createQuote);
+router.delete('/remove/:id', QuotationsController_1.QuotationsController.prototype.removeQuote);
+module.exports = router;

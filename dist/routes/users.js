@@ -45,27 +45,15 @@ var http_status_codes_1 = require("http-status-codes");
 var router = express_1.Router();
 router.get('/', UserController_1.UserController.prototype.all);
 router.get('/:id', UserController_1.UserController.prototype.one);
-router.post('/register', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, registerAttempt, _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                user = new User_1.User();
-                user = req.body;
-                return [4 /*yield*/, typeorm_1.getRepository(User_1.User).save(user)];
-            case 1:
-                registerAttempt = _b.sent();
-                _a = registerAttempt;
-                return [4 /*yield*/, typeorm_1.getRepository(Role_1.Role).findOne({ where: { name: 'customer' } })];
-            case 2:
-                _a.role = _b.sent();
-                if (registerAttempt) {
-                    res.status(http_status_codes_1.CREATED).json(registerAttempt);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
+// Used to create customers from the CRM administrative end
+router.post('/customer/create', UserController_1.UserController.prototype.registerCustomer);
+// This is similar to create only that it is used during the creation of a
+// customer from the e-commerce self guided registration
+router.post('/customer/register', UserController_1.UserController.prototype.register);
+router.get('/customers/all', UserController_1.UserController.prototype.customers);
+router.get('/customer/:id', UserController_1.UserController.prototype.oneCustomer);
+router.post('/login', UserController_1.UserController.prototype.login);
+router.get('/userroles/', UserController_1.UserController.prototype.roles);
 router.post('/addusertorole', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var userid, roleid, user, role, updateUser;
     return __generator(this, function (_a) {
@@ -119,4 +107,3 @@ router.post('/adduserroles', function (req, res, next) { return __awaiter(void 0
     });
 }); });
 module.exports = router;
-//# sourceMappingURL=users.js.map

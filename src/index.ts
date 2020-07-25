@@ -16,6 +16,7 @@ createConnection().then(async connection => {
     const userRouter = require('./routes/users')
     const ordersRouter = require('./routes/orders')
     const productsRouter = require('./routes/products')
+    const quotesRouter = require('./routes/quotes')
     const http = require('http')
 
  
@@ -47,11 +48,12 @@ createConnection().then(async connection => {
     app.use('/api/users', userRouter)
     app.use('/api/products', productsRouter)
     app.use('/api/orders', ordersRouter)
+    app.use('/api/quotes', quotesRouter)
     
-    server.listen(3000); 
+    const port = 3000
+    server.listen(port); 
 
 
-
-    console.log("Express server has started on port 3000. Open http://localhost:3000 to see results");
+    console.log(`Express server has started on port ${port}`);
 
 }).catch(error => console.log(error));

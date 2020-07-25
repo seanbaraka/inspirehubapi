@@ -9,7 +9,7 @@ router.get('/:productcode', ProductsController.prototype.getOneProduct);
 
 router.get('/category/:categoryId', ProductsController.prototype.productsByCategory);
 
-router.get('/categories', ProductsController.prototype.categories);
+router.get('/categories/all', ProductsController.prototype.categories);
 
 router.post('/createcategory', ProductsController.prototype.createcategory);
 

@@ -48,11 +48,48 @@ var ProductsController = /** @class */ (function () {
             var products;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Product_1.Product).find({ relations: ['category'] })];
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Product_1.Product).find({ relations: ['category', 'orders'] })];
                     case 1:
                         products = _a.sent();
                         if (products == null || products.length <= 0)
                             res.status(http_status_codes_1.NOT_FOUND).json({ error: "Not found" });
+                        res.status(http_status_codes_1.OK).json(products);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductsController.prototype.getOneProduct = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var product;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, typeorm_1.getRepository(Product_1.Product).findOne(req.params.productcode, { relations: ['category'] })];
+                    case 1:
+                        product = _a.sent();
+                        if (product == null)
+                            res.status(http_status_codes_1.NOT_FOUND).json({ error: http_status_codes_1.NOT_FOUND });
+                        res.status(http_status_codes_1.OK).json(product);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductsController.prototype.productsByCategory = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var productCategory, products;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        productCategory = req.params.categoryId;
+                        return [4 /*yield*/, typeorm_1.getRepository(Product_1.Product).find({
+                                where: { category: { id: productCategory } },
+                                relations: ['orders']
+                            })];
+                    case 1:
+                        products = _a.sent();
+                        if (products == null || products.length <= 0)
+                            res.status(http_status_codes_1.NOT_FOUND).json({ error: "No product matching the category was found" });
                         res.status(http_status_codes_1.OK).json(products);
                         return [2 /*return*/];
                 }
@@ -67,7 +104,7 @@ var ProductsController = /** @class */ (function () {
                     case 0: return [4 /*yield*/, typeorm_1.getRepository(ProductCategory_1.ProductCategory).find()];
                     case 1:
                         productCategories = _a.sent();
-                        if (productCategories == null || productCategories.length <= 0)
+                        if (productCategories === null || productCategories.length <= 0)
                             res.status(http_status_codes_1.NOT_FOUND).json({ error: "Not found" });
                         res.status(http_status_codes_1.OK).json(productCategories);
                         return [2 /*return*/];
@@ -102,7 +139,6 @@ var ProductsController = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        product = new Product_1.Product();
                         product = req.body;
                         if (product == null)
                             res.status(http_status_codes_1.BAD_REQUEST).json({ error: http_status_codes_1.BAD_REQUEST });
@@ -124,4 +160,3 @@ var ProductsController = /** @class */ (function () {
     return ProductsController;
 }());
 exports.ProductsController = ProductsController;
-//# sourceMappingURL=ProductsController.js.map

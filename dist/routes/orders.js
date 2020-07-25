@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var OrdersController_1 = require("../controller/OrdersController");
+var router = express_1.Router();
+router.get('/', OrdersController_1.OrdersController.prototype.getall);
+router.get('/:id', OrdersController_1.OrdersController.prototype.getOne);
+router.get('/customer/:id', OrdersController_1.OrdersController.prototype.getCustomerOrders);
+router.get('/invoices/all', OrdersController_1.OrdersController.prototype.getInvoices);
+router.get('/invoices/customer/:id', OrdersController_1.OrdersController.prototype.getCustomerInvoices);
+router.get('/invoices/unpaid', OrdersController_1.OrdersController.prototype.getUnpaidInvoices);
+router.get('/products/top', OrdersController_1.OrdersController.prototype.mostOrderedProduct);
+router.post('/payment/', OrdersController_1.OrdersController.prototype.payInvoice);
+router.get('/payments/all', OrdersController_1.OrdersController.prototype.getPayments);
+module.exports = router;

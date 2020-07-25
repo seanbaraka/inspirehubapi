@@ -11,6 +11,11 @@ router.get('/', UserController.prototype.all)
 
 router.get('/:id', UserController.prototype.one);
 
+// Used to create customers from the CRM administrative end
+router.post('/customer/create', UserController.prototype.registerCustomer)
+
+// This is similar to create only that it is used during the creation of a
+// customer from the e-commerce self guided registration
 router.post('/customer/register', UserController.prototype.register);
 
 router.get('/customers/all', UserController.prototype.customers)

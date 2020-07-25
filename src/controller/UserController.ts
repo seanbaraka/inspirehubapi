@@ -11,15 +11,14 @@ import { randomBytes, pbkdf2Sync, createCipher, pbkdf2 } from "crypto";
 import * as io from "socket.io";
 import {Invoice} from "../entity/Invoice";
 import {error} from "util";
+import SocketIO = require("socket.io");
 
 
 
 export class UserController {
 
-
     private userRepository = getRepository(User);
 
-    
     async all(req: Request, response: Response, next: NextFunction) {
        let users = await getRepository(User).find({ relations: ['role'] })
        if(!users) response.status(BAD_REQUEST).json(`Errror Code: ${BAD_REQUEST}`)
@@ -28,7 +27,7 @@ export class UserController {
     }
 
     async customers(req: Request, response: Response, next: NextFunction) {
-        let customers = await getRepository(Customer).find({ relations: ['user']})
+        let customers = await getRepository(Customer).find({ relations: ['user','orders']})
         if(customers === null || customers.length  <=0 ) response.status(NOT_FOUND).end()
 
 
@@ -42,6 +41,14 @@ export class UserController {
 
         response.status(OK).json(customer)
     }
+
+    // async getCustomerId(req: Request, res: Response) {
+    //     let customer = await getRepository(User).findOne({
+    //         where: {
+    //             emailAddress: req.params.
+    //         }
+    //     })
+    // }
 
     async one(request: Request, response: Response) {
         let user = await getRepository(User).findOne(request.params.id,{ relations: ['role']})
@@ -89,13 +96,46 @@ export class UserController {
         res.status(OK).json({success: roles})
     }
 
+    async registerCustomer(req:any, res: Response) {
+        let user = new User();
+        user.firstName = req.body.firstname
+        user.lastName = req.body.lastname
+
+        user.salt = randomBytes(16).toString('hex');
+
+        user.password = pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex')
+
+        user.emailAddress = req.body.email
+        user.role =  await getRepository(Role).findOne({ where: {
+                name: 'customer'
+            }})
+
+        let customer = new Customer()
+        customer.address = req.body.address
+        customer.telephone = req.body.phone
+
+        customer.user = user
+
+        await getRepository(User).save(user)
+        let newCustomer = await getRepository(Customer).save(customer)
+
+        let updatedCustomers = await getRepository(Customer).find({
+            relations: ['user','orders']
+        })
+        let io: SocketIO.Socket = req.io
+        io.emit('updateCustomers', updatedCustomers)
+
+        res.status(OK).json(newCustomer)
+
+    }
+
     async register(req: any, res: Response) {
 
         let user = new User()
         user.firstName = req.body.firstname
         user.lastName = req.body.lastname
 
-        
+
         user.salt = randomBytes(16).toString('hex');
 
         user.password = pbkdf2Sync(req.body.password, user.salt, 1000, 64, 'sha512').toString('hex')

@@ -32,4 +32,3 @@ var Role = /** @class */ (function () {
     return Role;
 }());
 exports.Role = Role;
-//# sourceMappingURL=Role.js.map

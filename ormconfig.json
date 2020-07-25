@@ -6,7 +6,7 @@
    "password": "Developer@1425",
    "database": "inspirehubdb",
    "synchronize": true,
-   "logging": false,
+   "logging": true,
    "entities": [
       "src/entity/**/*.ts"
    ],
