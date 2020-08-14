@@ -282,6 +282,7 @@ var UserController = /** @class */ (function () {
                         now = new Date(Date.now());
                         dueDate = now.setDate(now.getDate() + 30);
                         inv.duedate = new Date(dueDate);
+                        inv.balance = orderAdd.amount;
                         return [4 /*yield*/, typeorm_1.getRepository(Invoice_1.Invoice).save(inv)];
                     case 5:
                         createInvoiceAttempt = _b.sent();

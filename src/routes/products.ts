@@ -15,5 +15,8 @@ router.post('/createcategory', ProductsController.prototype.createcategory);
 
 router.post('/createproduct', ProductsController.prototype.createproduct);
 
+router.delete('/categories/remove/:id', ProductsController.prototype.removeCategory);
+
+router.delete('/products/remove/:id', ProductsController.prototype.removeProduct)
 
 module.exports = router;

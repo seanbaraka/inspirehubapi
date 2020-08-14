@@ -60,7 +60,7 @@ typeorm_1.createConnection({
         http = require('http');
         cors = require('cors');
         corsOptions = {
-            origin: "http://localhost:4200",
+            origin: "http://app.inspirehub.co.ke",
             optionsSuccessStatus: 200
         };
         app.use(cors(corsOptions));

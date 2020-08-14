@@ -196,6 +196,7 @@ export class UserController {
         let dueDate = now.setDate(now.getDate() + 30)
 
         inv.duedate = new Date(dueDate)
+        inv.balance = orderAdd.amount
 
         let createInvoiceAttempt = await getRepository(Invoice).save(inv);
 

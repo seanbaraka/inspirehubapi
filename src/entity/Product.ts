@@ -17,7 +17,8 @@ export class Product {
     description: string
 
     @ManyToOne(type => ProductCategory, pc => pc.products, {
-        cascade: true
+        cascade: true,
+        onDelete: 'CASCADE'
     })
     category: ProductCategory
 
